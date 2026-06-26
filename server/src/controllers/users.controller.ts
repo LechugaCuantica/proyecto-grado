@@ -80,136 +80,97 @@ export async function register(req: Request<unknown, unknown, UserRegister>, res
 }
 
 
-export async function getUsers(req: Request, res: Response<{ message: string, users?: User[] }>) {
+export async function getUsers(req: Request, res: Response) {
+
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-
-        if (!token) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        const decoded = jwt.verify(token, SECRET_KEY) as { document: string, role: number };
-
-        if (!decoded) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        const user = await findUserByDocument(decoded.document);
-
-        if (!user) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        if (user.role !== 1) return res.status(401).json({ message: "Acceso no autorizado." });
 
         const users = await findUsers();
 
         return res.status(200).json({
-            message: "Usuarios obtenidos exitosamente",
+            message: "Usuarios obtenidos",
             users
         });
+
     } catch (error) {
+
         console.log(error);
 
-
-        if (error instanceof jwt.JsonWebTokenError) {
-            if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") return res.status(401).json({ message: "Acceso no autorizado." });
-        }
-
         return res.status(500).json({
-            message: "Error al obtener los usuarios"
+            message: "Error al obtener usuarios"
         });
+
     }
+
 }
 
+export async function updateUsers(req, res) {
 
-export async function updateUsers(req: Request<{ document: string }, unknown, Partial<User>>, res: Response<{ message: string }>) {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-
-        if (!token) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        const decoded = jwt.verify(token, SECRET_KEY) as { document: string, role: number };
-
-        if (!decoded) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        const user = await findUserByDocument(decoded.document);
-
-        if (!user) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        if (user.role !== 1) return res.status(401).json({ message: "Acceso no autorizado." });
 
         const { document } = req.params;
-        const { password } = req.body;
 
-        if (password) {
+        if(req.body.password){
+
             const salt = await bcrypt.genSalt(10);
-            const newPassword = await bcrypt.hash(password, salt);
-            req.body.password = newPassword;
+
+            req.body.password = await bcrypt.hash(req.body.password,salt);
+
         }
 
-        const result = await modifyUser(document, req.body);
+        const result = await modifyUser(document,req.body);
 
-        if (!result || result.affectedRows === 0) return res.status(500).json({
-            message: "Error al actualizar el usuario"
+        if(result.affectedRows===0){
+
+            return res.status(404).json({
+                message:"Usuario no encontrado"
+            });
+
+        }
+
+        res.json({
+            message:"Usuario actualizado"
         });
 
-        return res.status(200).json({
-            message: "Usuario actualizado exitosamente"
-        });
+    }catch(error){
 
-    } catch (error) {
         console.log(error);
 
-
-        if (error instanceof jwt.JsonWebTokenError) {
-            if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") return res.status(401).json({ message: "Acceso no autorizado." });
-        }
-
-        return res.status(500).json({
-            message: "Error al actualizar el usuario"
+        res.status(500).json({
+            message:"Error"
         });
+
     }
 
 }
 
+export async function deleteUserController(req,res){
 
-export async function deleteUserController(req: Request<{ document: string }>, res: Response<{ message: string }>) {
-    try {
-        const token = req.headers.authorization?.split(" ")[1];
+    try{
 
-        if (!token) return res.status(401).json({ message: "Acceso no autorizado." });
+        const {document}=req.params;
 
-        const decoded = jwt.verify(token, SECRET_KEY) as { document: string, role: number };
+        const result=await deleteUser(document);
 
-        if (!decoded) return res.status(401).json({ message: "Acceso no autorizado." });
+        if(result.affectedRows===0){
 
-        const user = await findUserByDocument(decoded.document);
-
-        if (!user) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        if (user.role !== 1) return res.status(401).json({ message: "Acceso no autorizado." });
-
-        const { document } = req.params;
-
-        const result = await deleteUser(document);
-
-        if (!result || result.affectedRows === 0) return res.status(500).json({
-            message: "Error al eliminar el usuario"
-        });
-
-        return res.status(200).json({
-            message: "Usuario eliminado exitosamente"
-        });
-
-    } catch (error) {
-        console.log(error);
-
-
-        if (error instanceof jwt.JsonWebTokenError) {
-            if (error.name === "TokenExpiredError") return res.status(401).json({ message: "Sesión expirada." });
-
-            if (error.name === "JsonWebTokenError") return res.status(401).json({ message: "Acceso no autorizado." });
+            return res.status(404).json({
+                message:"Usuario no encontrado"
+            });
 
         }
 
-        return res.status(500).json({
-            message: "Error al eliminar el usuario"
+        res.json({
+            message:"Usuario eliminado"
+        });
+
+    }catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+            message:"Error"
         });
 
     }
+
 }
