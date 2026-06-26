@@ -28,8 +28,13 @@ function Users() {
     }, []);
 
     return (
-        <>
-            <h1>Crudsito mamalon</h1>
+        <div className="max-w-6xl mx-auto space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900">Gestión de Usuarios</h1>
+                <p className="mt-2 text-sm text-gray-600">
+                    Administra y gestiona las cuentas de usuario de la plataforma. Crea nuevos usuarios, actualiza sus datos o elimínalos.
+                </p>
+            </div>
 
             <UserForm
                 loadUsers={loadUsers}
@@ -37,14 +42,12 @@ function Users() {
                 setEditUser={setEditUser}
             />
 
-            <hr />
-
             <UserTable
                 users={users}
                 loadUsers={loadUsers}
                 setEditUser={setEditUser}
             />
-        </>
+        </div>
     );
 }
 
