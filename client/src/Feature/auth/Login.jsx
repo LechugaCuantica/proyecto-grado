@@ -16,6 +16,9 @@ const LoginApp = () => {
         try {
             const response = await axios.post('http://localhost:3000/login', datos);
             if (response.status === 200) {
+
+                localStorage.setItem("token", response.data.token);
+
                 alert("¡Ingreso correcto!");
                 navigate('/dashboard');
             }
