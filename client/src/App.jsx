@@ -3,15 +3,13 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
-import Users from './pages/Users'
-
+import RoutesApp from './Routes/Routes'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <Users />
+      <RoutesApp />
     </>
   )
 }
