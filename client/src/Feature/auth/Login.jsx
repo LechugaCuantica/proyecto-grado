@@ -20,6 +20,7 @@ const LoginApp = () => {
                 navigate('/dashboard');
             }
         } catch (error) {
+            alert(error?.response?.data?.message || "Error al iniciar sesión");
             console.log("Error al iniciar sesión: ", error);
         }
     };
